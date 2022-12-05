@@ -85,7 +85,7 @@ class TSPSolver:
         count = 0
         bssf = None
         start_time = time.time()
-        
+
         while not foundTour and time.time()-start_time < time_allowance:
             route = []
             randomNumber = random.randint(0, ncities-1)
@@ -109,7 +109,7 @@ class TSPSolver:
 
         if(foundTour):
             bssf = TSPSolution(route)
-        
+
         end_time = time.time()
         results['cost'] = bssf.cost if foundTour else math.inf
         results['time'] = end_time - start_time
@@ -218,8 +218,8 @@ class TSPSolver:
                                 bssf_route = TSPSolution(new_state.path)
                                 bssf_cost = bssf_route.cost
                                 solution_count +=1
-                                
-                        #If the path is not complete, 
+
+                        #If the path is not complete,
                         #add or prune this state
                         elif new_state.cost < bssf_cost:
                             heapq.heappush(queue, new_state)
@@ -283,6 +283,40 @@ class TSPSolver:
     def fancy(self, time_allowance=60.0):
         pass
 
+    def weightedC(self, time_allowance = 60.0):
+        results = {}
+        cities = self._scenario.getCities()
+        ncities = len(cities)
+        foundTour = False
+        count = 0
+        bssf = None
+        start_time = time.time()
+
+        while not foundTour and time.time()-start_time < time_allowance:
+            route = []
+            random_start_index = random.randint(0, ncities-1)
+            start_city = cities[random_start_index]
+            current_city = start_city
+            route.append(current_city)
+            weights_matrix = np.empty((ncities, ncities))
+
+            while(True):
+                minimum_length = math.inf
+                next_city = None
+                for city in cities:
+                    if(current_city.costTo(city) < minimum_length):
+                        if(route.count(city) < 1):
+                            minimum_length = current_city.costTo(city)
+                            next_city = city
+                if(next_city == None):
+                    if(current_city.costTo(start_city) != math.inf and len(route) == ncities):
+                        foundTour = True
+                    break
+                route.append(next_city)
+                current_city = next_city
+
+
+
 
 class State:
     def __init__(self, matrix, path, score, index):
@@ -292,5 +326,5 @@ class State:
         self.city_index = index
 
     def __lt__(self, other):
-        
+
         return self.cost / len(self.path) < other.cost / len(other.path)
